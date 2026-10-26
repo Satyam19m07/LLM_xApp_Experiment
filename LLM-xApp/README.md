@@ -1,15 +1,37 @@
 # LLM-xApp Experiment
 
-This repository contains my experimental setup for studying **LLM-assisted resource allocation in 5G O-RAN network slicing**.
+This repository contains an experimental setup for studying **LLM-assisted resource allocation in 5G O-RAN network slicing**.
 
-The project is based on the original **LLM-xApp** repository by Fangzhou-Code and is used here to understand, run, and analyze the TNAS-based resource allocation workflow.
-
-Original project:
-`https://github.com/Fangzhou-Code/LLM-xApp`
+The main goal is to understand how an LLM-assisted controller can observe the current network condition, generate multiple possible resource-allocation actions, evaluate those actions using a local critic, and select a suitable PRB allocation for different network slices.
 
 ---
 
-## 1. What is this project?
+## 1. Research Paper
+
+This implementation is based on the research work:
+
+**LLM-xApp: A Large Language Model Empowered Radio Resource Management xApp for 5G O-RAN**
+
+### Paper Authors
+
+- Xingqi Wu
+- Junaid Farooq
+- Yuhui Wang
+- Juntao Chen
+
+### Publication
+
+**IEEE INFOCOM Workshop 2026**
+
+### Paper Link
+
+[LLM-xApp: A Large Language Model Empowered Radio Resource Management xApp for 5G O-RAN](https://doi.org/10.1109/INFOCOM59046.2026.11571592)
+
+The paper studies how Large Language Models can help perform adaptive radio resource allocation for different network slices in O-RAN.
+
+---
+
+## 2. What is this project?
 
 In a 5G/O-RAN system, radio resources such as PRBs are limited.
 
@@ -44,11 +66,13 @@ Proportional
 TNAS
 ```
 
-The most important method is **TNAS — Top-N Action Sampling**.
+The most important method is:
+
+**TNAS — Top-N Action Sampling**
 
 ---
 
-## 2. Main idea of TNAS
+## 3. Main idea of TNAS
 
 TNAS does not directly allow the LLM to control the network.
 
@@ -85,11 +109,25 @@ Utility / shortfall / reward
 Critic learns from the result
 ```
 
-This makes the system easier to control and evaluate.
+The important idea is:
+
+```text
+LLM
+→ proposes possible actions
+
+Local critic
+→ evaluates the actions
+
+Network environment
+→ shows what actually happens
+
+Performance metrics
+→ measure whether the selected action was good
+```
 
 ---
 
-## 3. Important repository files
+## 4. Important repository files
 
 ```text
 LLM-xApp/
@@ -148,12 +186,12 @@ LLM-xApp/
 | `metrics.py` | Calculates utility, reliability, shortfall and reward |
 | `prompts.py` | Converts network information into an LLM prompt |
 | `tnas.py` | Main TNAS controller and local critic |
-| `run_experiments.py` | Runs the full experiment |
-| `show_results.py` | Displays important CSV results in a clean table |
+| `run_experiments.py` | Runs the complete experiment |
+| `show_results.py` | Displays important results in a clean table |
 
 ---
 
-## 4. Requirements
+## 5. Requirements
 
 Recommended environment:
 
@@ -164,25 +202,51 @@ Git
 Python virtual environment
 ```
 
----
-
-## 5. Clone the repository
+Check Python:
 
 ```bash
-git clone https://github.com/Satyam19m07/LLM_xApp_Experiment.git
+python3 --version
 ```
 
-Enter the project:
+Check Git:
 
 ```bash
-cd LLM_xApp_Experiment/LLM-xApp
+git --version
 ```
 
 ---
 
-## 6. Create Python virtual environment
+## 6. Go to the project directory
 
-Create the environment:
+If the project is already available on the system, move into the main experiment folder:
+
+```bash
+cd ~/LLM_xApp_Experiment/LLM-xApp
+```
+
+Check the current directory:
+
+```bash
+pwd
+```
+
+Expected format:
+
+```text
+/home/<username>/LLM_xApp_Experiment/LLM-xApp
+```
+
+Check repository files:
+
+```bash
+ls
+```
+
+---
+
+## 7. Create and activate Python virtual environment
+
+Create the virtual environment:
 
 ```bash
 python3 -m venv .venv
@@ -212,7 +276,7 @@ Install the project:
 python3 -m pip install -e .
 ```
 
-Install pandas for the clean result-table script:
+Install pandas for clean result tables:
 
 ```bash
 python3 -m pip install pandas
@@ -220,27 +284,31 @@ python3 -m pip install pandas
 
 ---
 
-## 7. Run unit tests
+## 8. Run unit tests
 
-Before running the experiment, check whether the basic code is working:
+Before starting the experiment, check that the main functions are working:
 
 ```bash
 python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
-A successful run should end with:
+A successful test should end with:
 
 ```text
 OK
 ```
 
+This means the basic implementation is working correctly.
+
 ---
 
-## 8. Run TNAS only
+## 9. Run TNAS only
 
 For the first experiment, use the local deterministic `stub` client.
 
-This does not require an external API key.
+The stub does not require an external LLM API or API key.
+
+Run:
 
 ```bash
 python3 -m scripts.run_experiments \
@@ -254,23 +322,23 @@ python3 -m scripts.run_experiments \
 
 ```text
 --methods tnas
-Run only the TNAS controller.
+→ Run only TNAS
 
 --seed 0
-Use a fixed random seed so the experiment is reproducible.
+→ Use the same random seed so the experiment is reproducible
 
 --out outputs/demo_tnas
-Save the experiment results in this folder.
+→ Save experiment outputs in this directory
 
 --llm-runs stub:stub
-Use the local deterministic stub instead of an online LLM.
+→ Use the local deterministic stub instead of an online LLM
 ```
 
 ---
 
-## 9. Understanding the TNAS terminal output
+## 10. Understanding the TNAS terminal output
 
-During execution, you may see something similar to:
+During execution, the terminal may show:
 
 ```text
 TNAS t=700 candidates=8 chosen_idx=7 action=(128, 1) prbs=(158, 2) score=3767.77 mode=real
@@ -281,34 +349,34 @@ Easy meaning:
 | Field | Meaning |
 |---|---|
 | `t=700` | Current simulation time |
-| `candidates=8` | Eight candidate actions are being considered |
-| `chosen_idx=7` | Candidate number 7 was selected |
+| `candidates=8` | Number of candidate actions |
+| `chosen_idx=7` | Candidate selected by the controller |
 | `action=(128,1)` | Selected controller action |
-| `prbs=(158,2)` | Actual PRB allocation after mapping |
-| `score=...` | Score predicted by the local critic |
+| `prbs=(158,2)` | PRBs after action-to-PRB mapping |
+| `score=...` | Score given by the local critic |
 | `mode=real` | RealScore critic mode |
 
-The main idea is:
+The simple workflow is:
 
 ```text
 Network observation
         |
         v
-Generate candidates
+Generate candidate actions
         |
         v
-Critic scores them
+Critic evaluates candidates
         |
         v
-Select best candidate
+Select best action
         |
         v
-Apply PRBs
+Convert action to PRBs
 ```
 
 ---
 
-## 10. Check TNAS output files
+## 11. Check TNAS output files
 
 After the experiment finishes:
 
@@ -316,27 +384,32 @@ After the experiment finishes:
 ls -lh outputs/demo_tnas
 ```
 
-Typical outputs include:
+Typical output files include:
 
 ```text
 timeseries_tnas_stub_stub.csv
 config_used.yaml
-figures
-llm_cache
+llm_cache/
+PNG figures
+PDF figures
 ```
 
 ---
 
-## 11. Show experiment result as a clean table
+## 12. Show experiment results as a clean table
 
-Instead of reading the full CSV directly, use:
+The complete CSV contains many columns and can be difficult to read directly.
+
+Use:
 
 ```bash
 python3 scripts/show_results.py \
   outputs/demo_tnas/timeseries_tnas_stub_stub.csv
 ```
 
-This shows only important values such as:
+This displays important parameters in a cleaner form.
+
+Typical important values are:
 
 ```text
 Time
@@ -349,28 +422,28 @@ Utility
 V_k_soft
 ```
 
-### Main columns
+### Important columns
 
 | Column | Meaning |
 |---|---|
 | `t` | Simulation time |
-| `prb1` | PRBs given to Slice/UE1 |
-| `prb2` | PRBs given to Slice/UE2 |
-| `sigma1` | Required throughput of UE1 |
-| `sigma2` | Required throughput of UE2 |
+| `prb1` | PRBs allocated to Slice/UE1 |
+| `prb2` | PRBs allocated to Slice/UE2 |
+| `sigma1` | Requested throughput of UE1 |
+| `sigma2` | Requested throughput of UE2 |
 | `hat_sigma1` | Measured throughput of UE1 |
 | `hat_sigma2` | Measured throughput of UE2 |
-| `shortfall1` | How far UE1 is below its target |
-| `shortfall2` | How far UE2 is below its target |
+| `shortfall1` | UE1 throughput shortage |
+| `shortfall2` | UE2 throughput shortage |
 | `u1` | Utility of UE1 |
 | `u2` | Utility of UE2 |
-| `V_k_soft` | Real reward/evaluation used by TNAS |
+| `V_k_soft` | Real performance reward used by TNAS |
 
 ---
 
-## 12. Run all four methods
+## 13. Run all four methods
 
-To compare:
+The framework supports:
 
 ```text
 Equal
@@ -379,7 +452,7 @@ Proportional
 TNAS
 ```
 
-run:
+Run all four using:
 
 ```bash
 python3 -m scripts.run_experiments \
@@ -395,7 +468,7 @@ After completion:
 ls -lh outputs/all_methods_stub
 ```
 
-Important CSV files:
+Important CSV files include:
 
 ```text
 timeseries_equal.csv
@@ -404,55 +477,69 @@ timeseries_proportional.csv
 timeseries_tnas_stub_stub.csv
 ```
 
+These files allow the different allocation strategies to be compared.
+
 ---
 
-## 13. Important figures
+## 14. Important result figures
 
-The experiment generates several figures.
+The experiment generates several useful figures.
 
-Useful ones include:
+### Overall experiment behavior
 
 ```text
 fig4.png
 ```
 
-Overall experiment behavior.
+### System utility
 
 ```text
 fig5a_sys_utility.png
 ```
 
-System utility.
+### System reliability/severity
 
 ```text
 fig5b_sys_reliability_severity.png
 ```
 
-System reliability/severity.
+### Average utility comparison
 
 ```text
 fig5c_avg_utility.png
 ```
 
-Average utility comparison between methods.
+### Average reliability/severity comparison
 
 ```text
 fig5d_avg_reliability_severity.png
 ```
 
-Average reliability/severity comparison.
+For a short demonstration, the most useful figures are:
+
+```text
+fig4.png
+
+fig5c_avg_utility.png
+
+fig5d_avg_reliability_severity.png
+```
 
 ---
 
-## 14. Running the project on a remote VM
+## 15. Running the experiment on a remote VM
 
-If the experiment is running on a headless VM, the figures may not open directly with:
+If the experiment is running on a headless VM, graphical figures may not open directly.
+
+For example:
 
 ```bash
 xdg-open figure.png
 ```
 
-In this case, copy the figures to the local machine.
+may fail because the VM has no graphical display.
+
+In this case, copy the figures to the local computer.
 
 Example:
 
@@ -461,7 +548,7 @@ scp 'student@VM_IP:/home/student/LLM_xApp_Experiment/LLM-xApp/outputs/all_method
   ~/LLM_xApp_Figures/
 ```
 
-Then open the folder locally:
+Then open the local figure directory:
 
 ```bash
 xdg-open ~/LLM_xApp_Figures
@@ -469,9 +556,9 @@ xdg-open ~/LLM_xApp_Figures
 
 ---
 
-## 15. Recommended demo sequence
+## 16. Recommended live demo sequence
 
-For a short live demo:
+A simple demo can be performed using the following sequence.
 
 ### Step 1 — Connect to VM
 
@@ -479,25 +566,25 @@ For a short live demo:
 ssh student@VM_IP
 ```
 
-### Step 2 — Go to repository
+### Step 2 — Enter the project
 
 ```bash
 cd ~/LLM_xApp_Experiment/LLM-xApp
 ```
 
-### Step 3 — Activate environment
+### Step 3 — Activate Python environment
 
 ```bash
 source .venv/bin/activate
 ```
 
-### Step 4 — Show repository
+### Step 4 — Show repository files
 
 ```bash
 ls
 ```
 
-### Step 5 — Run tests
+### Step 5 — Run unit tests
 
 ```bash
 python3 -m unittest discover -s tests -p "test_*.py"
@@ -513,13 +600,13 @@ python3 -m scripts.run_experiments \
   --llm-runs stub:stub
 ```
 
-### Step 7 — Check output
+### Step 7 — Check generated output
 
 ```bash
 ls -lh outputs/demo_tnas
 ```
 
-### Step 8 — Show clean result table
+### Step 8 — Display clean result table
 
 ```bash
 python3 scripts/show_results.py \
@@ -532,9 +619,11 @@ python3 scripts/show_results.py \
 ls -lh outputs/all_methods_stub
 ```
 
+This sequence provides a short and clear demonstration of the complete framework.
+
 ---
 
-## 16. Complete TNAS workflow
+## 17. Complete TNAS workflow
 
 ```text
 Synthetic RAN environment
@@ -552,7 +641,7 @@ LLM / Stub
 Top-N candidate actions
           |
           v
-Feasibility check
+Feasibility / validation
           |
           v
 Local RealScore critic
@@ -580,32 +669,32 @@ Critic update
 
 ---
 
-## 17. Methods implemented
+## 18. Methods implemented
 
 ### Equal
 
-Resources are divided equally between slices.
+The total available resources are divided equally.
 
 Example:
 
 ```text
 160 total PRBs
 
-UE1 = 80
-UE2 = 80
+Slice 1 = 80
+Slice 2 = 80
 ```
 
 ### Random
 
-Resource allocation is selected randomly.
+The controller randomly selects resource allocations.
 
-This is mainly used as a comparison baseline.
+This method is mainly used as a baseline.
 
 ### Proportional
 
-Resources are allocated according to traffic demand.
+Resources are allocated according to the current traffic requirement.
 
-Higher demand receives more resources.
+A slice with more demand generally receives more resources.
 
 ### TNAS
 
@@ -615,41 +704,56 @@ TNAS stands for:
 Top-N Action Sampling
 ```
 
-The LLM generates several possible actions.
+The process is:
 
-The local critic evaluates them.
-
-The best candidate is selected and applied to the simulated network.
+```text
+Current network state
+        |
+        v
+Generate several possible actions
+        |
+        v
+Local critic evaluates them
+        |
+        v
+Select the best candidate
+```
 
 ---
 
-## 18. Why use a local stub?
+## 19. Why use the local stub?
 
-The repository supports a deterministic local `stub`.
+The deterministic `stub` is useful for initial experiments.
 
-Benefits:
+Advantages:
 
 ```text
 No API key required
-No API cost
-No Internet LLM dependency
-Repeatable results
-Good for debugging and demonstrations
+
+No external LLM cost
+
+No dependency on Internet-based LLM services
+
+Repeatable experiment behavior
+
+Easy debugging
+
+Good for demonstrations
 ```
 
-The same controller architecture can later be tested with supported online LLM providers.
+After the complete workflow is verified, the same architecture can be tested with supported online LLM clients.
 
 ---
 
-## 19. Output interpretation
+## 20. How to understand the result
 
-The experiment should be understood as:
+The basic result flow is:
 
 ```text
 Requested throughput
         |
         v
-Resource allocation
+PRB allocation
         |
         v
 Measured throughput
@@ -661,18 +765,28 @@ Shortfall
 Utility
         |
         v
-Reliability / reward
+Reward / reliability evaluation
 ```
 
-The main research question is:
+For example:
 
-> Can an LLM-assisted controller generate useful resource-allocation candidates while a local critic safely selects the best action?
+```text
+Required rate = 40 Mbps
+
+Measured rate = 30 Mbps
+```
+
+means the slice is experiencing a throughput shortfall.
+
+The controller tries to choose allocations that reduce these shortages while using radio resources efficiently.
 
 ---
 
-## 20. Updating the GitHub repository
+## 21. Updating the GitHub repository
 
-After changing code or results:
+After modifying code, results, or documentation:
+
+Check changes:
 
 ```bash
 git status
@@ -698,15 +812,15 @@ git push
 
 ---
 
-## 21. Exit the environment
+## 22. Exit the experiment environment
 
-Leave the Python virtual environment:
+Leave the Python environment:
 
 ```bash
 deactivate
 ```
 
-If connected through SSH:
+If connected to the experiment system using SSH:
 
 ```bash
 exit
@@ -714,17 +828,28 @@ exit
 
 ---
 
-## Acknowledgment
+## Paper Credit
 
-This experimental repository is based on the original **LLM-xApp** project:
+This experimental implementation is based on the research work:
 
-```text
-Fangzhou-Code/LLM-xApp
-```
+**LLM-xApp: A Large Language Model Empowered Radio Resource Management xApp for 5G O-RAN**
 
-Original repository:
+Authors:
 
-`https://github.com/Fangzhou-Code/LLM-xApp`
+- Xingqi Wu
+- Junaid Farooq
+- Yuhui Wang
+- Juntao Chen
+
+Published/accepted in:
+
+**IEEE INFOCOM Workshop 2026**
+
+Paper:
+
+[https://doi.org/10.1109/INFOCOM59046.2026.11571592](https://doi.org/10.1109/INFOCOM59046.2026.11571592)
+
+If you use or extend this work for academic research, please cite the original paper.
 
 The original project provides the core simulation framework for LLM-assisted radio resource management in 5G O-RAN.
 
