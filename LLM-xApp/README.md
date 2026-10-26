@@ -848,9 +848,3 @@ Published/accepted in:
 Paper:
 
 [https://doi.org/10.1109/INFOCOM59046.2026.11571592](https://doi.org/10.1109/INFOCOM59046.2026.11571592)
-
-If you use or extend this work for academic research, please cite the original paper.
-
-The original project provides the core simulation framework for LLM-assisted radio resource management in 5G O-RAN.
-
-This repository is used for learning, experimentation, result analysis, and extending the workflow in an easy-to-understand form.
