@@ -1,0 +1,14 @@
+.env
+__pycache__/
+.pycache/
+.pycache_local
+outputs/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+*.pdf
+output.md
+test.py
